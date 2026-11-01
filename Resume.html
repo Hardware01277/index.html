@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varun Kumar - Graphic Designer & Video Editor | Portfolio 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1b1b26',
+                            600: '#2a2a3d'
+                        },
+                        neon: {
+                            cyan: '#00f2fe',
+                            purple: '#7f00ff',
+                            orange: '#ff6b00',
+                            pink: '#ff007f'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 25px rgba(0, 242, 254, 0.3)',
+                        'neon-purple': '0 0 25px rgba(127, 0, 255, 0.3)',
+                        'neon-orange': '0 0 25px rgba(255, 107, 0, 0.3)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Background Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a3d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(18, 18, 26, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 242, 254, 0.4);
+            box-shadow: 0 12px 40px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Custom glowing cursor */
+        .cursor-dot, .cursor-outline {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00f2fe;
+        }
+        .cursor-outline {
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(127, 0, 255, 0.6);
+            transition: transform 0.15s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+        }
+
+        /* Canvas background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glowing text gradient */
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #7f00ff 50%, #ff007f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Left-to-Right Continuous Marquee Animation */
+        @keyframes slideLeftToRight {
+            0% {
+                transform: translateX(-50%);
+            }
+            100% {
+                transform: translateX(0%);
+            }
+        }
+        .animate-left-to-right {
+            display: flex;
+            width: max-content;
+            animation: slideLeftToRight 95s linear infinite;
+        }
+        .animate-left-to-right:hover {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 font-sans selection:bg-neon-cyan selection:text-dark-900 overflow-x-hidden">
+
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block" id="cursor-dot"></div>
+    <div class="cursor-outline hidden md:block" id="cursor-outline"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-32 opacity-0 transition-all duration-300 glass-card px-6 py-4 rounded-xl border border-neon-cyan/50 shadow-neon-cyan flex items-center space-x-3">
+        <i class="fa-solid fa-circle-check text-neon-cyan text-xl"></i>
+        <div>
+            <h4 class="font-bold text-sm" id="toast-title">Success!</h4>
+            <p class="text-xs text-slate-300" id="toast-msg">Message sent successfully.</p>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 z-40 glass-card border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
+        <a href="#hero" class="flex items-center space-x-3 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neon-cyan to-neon-purple flex items-center justify-center font-black text-dark-900 text-lg shadow-neon-cyan group-hover:scale-105 transition-transform">
+                V
+            </div>
+            <div>
+                <span class="font-extrabold text-lg tracking-wider gradient-text">VARUN KUMAR</span>
+                <span class="block text-[10px] text-slate-400 tracking-widest uppercase">Graphic Designer & Video Editor</span>
+            </div>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center space-x-7 text-sm font-medium">
+            <a href="#about" class="text-slate-300 hover:text-neon-cyan transition-colors">About & Skills</a>
+            <a href="#experience" class="text-slate-300 hover:text-neon-cyan transition-colors">Experience</a>
+            <a href="#image-showcase" class="text-neon-cyan font-bold hover:text-white transition-colors"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Design Showcase</a>
+            <a href="#video-showcase" class="text-neon-orange font-bold hover:text-white transition-colors"><i class="fa-solid fa-film mr-1.5"></i>Video Production</a>
+            <a href="#portfolio" class="text-slate-300 hover:text-neon-cyan transition-colors">Portfolio Grid</a>
+            <a href="#education" class="text-slate-300 hover:text-neon-cyan transition-colors">Education</a>
+            <a href="#contact" class="text-slate-300 hover:text-neon-cyan transition-colors">Contact</a>
+        </nav>
+
+        <div class="hidden md:flex items-center space-x-4">
+            <a href="#contact" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-900 font-bold text-sm shadow-neon-cyan hover:opacity-90 transition-all hover:scale-105">
+                Let's Talk <i class="fa-solid fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="lg:hidden text-2xl text-slate-200 focus:outline-none">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Mobile Menu Modal -->
+    <div id="mobile-menu" class="fixed inset-0 z-50 bg-dark-900/95 backdrop-blur-2xl flex flex-col justify-center items-center space-y-6 text-xl font-semibold opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden">
+        <button id="close-menu" class="absolute top-6 right-6 text-3xl text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <a href="#about" class="mobile-link text-slate-200 hover:text-neon-cyan">About & Skills</a>
+        <a href="#experience" class="mobile-link text-slate-200 hover:text-neon-cyan">Experience</a>
+        <a href="#image-showcase" class="mobile-link text-neon-cyan">Design Showcase</a>
+        <a href="#video-showcase" class="mobile-link text-neon-orange">Video Production</a>
+        <a href="#portfolio" class="mobile-link text-slate-200 hover:text-neon-cyan">Portfolio Works</a>
+        <a href="#education" class="mobile-link text-slate-200 hover:text-neon-cyan">Education & Hobbies</a>
+        <a href="#contact" class="mobile-link px-8 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-900 font-bold shadow-neon-cyan">Contact Me</a>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+
+        <!-- 1. HERO SECTION -->
+        <section id="hero" class="min-h-[85vh] flex flex-col lg:flex-row items-center justify-between py-12 gap-12">
+            <div class="flex-1 space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full glass-card border border-neon-cyan/30 text-neon-cyan text-xs font-semibold tracking-wider uppercase shadow-neon-cyan">
+                    <span class="w-2 h-2 rounded-full bg-neon-cyan animate-ping"></span>
+                    <span>Available for 2026 Projects & Creative Leadership</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none">
+                    Hi, I'm <span class="gradient-text">Varun Kumar</span>
+                </h1>
+
+                <p class="text-xl sm:text-2xl font-bold text-slate-300 tracking-wide">
+                    Professional Graphic Designer & Video Editor
+                </p>
+
+                <p class="text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                    With <span class="text-neon-cyan font-bold">6+ years of expertise</span> in high-end print production, packaging design, corporate branding, and dynamic commercial video editing. Crafting visual excellence for industry leaders like Duropack & Gulika Apparel.
+                </p>
+
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
+                    <a href="#image-showcase" class="px-7 py-4 rounded-2xl bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink text-dark-900 font-bold text-base shadow-neon-purple hover:scale-105 transition-all flex items-center space-x-3">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>Explore Graphic Works</span>
+                    </a>
+                    <a href="#video-showcase" class="px-7 py-4 rounded-2xl glass-card border border-neon-orange/50 hover:border-neon-orange text-white font-bold text-base shadow-neon-orange hover:scale-105 transition-all flex items-center space-x-3">
+                        <i class="fa-solid fa-circle-play text-neon-orange"></i>
+                        <span>Watch Video Showreel</span>
+                    </a>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-4 pt-8 max-w-lg mx-auto lg:mx-0">
+                    <div class="glass-card p-4 rounded-xl text-center border border-white/5">
+                        <h3 class="text-2xl font-black text-neon-cyan">6+ Yrs</h3>
+                        <p class="text-xs text-slate-400 mt-1">Experience</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center border border-white/5">
+                        <h3 class="text-2xl font-black text-neon-purple">100+</h3>
+                        <p class="text-xs text-slate-400 mt-1">Brand Projects</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center border border-white/5">
+                        <h3 class="text-2xl font-black text-neon-orange">100%</h3>
+                        <p class="text-xs text-slate-400 mt-1">Quality Precision</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Visual / Avatar Card -->
+            <div class="flex-1 flex justify-center">
+                <div class="relative w-72 sm:w-96 h-72 sm:h-96">
+                    <!-- Glowing Backdrops -->
+                    <div class="absolute inset-0 bg-gradient-to-tr from-neon-cyan via-neon-purple to-neon-orange rounded-full filter blur-2xl opacity-40 animate-pulse"></div>
+
+                    <!-- Outer Rotating Ring -->
+                    <div class="absolute inset-0 border-2 border-dashed border-neon-cyan/40 rounded-full animate-[spin_20s_linear_infinite]"></div>
+
+                    <!-- Main Card Container -->
+                    <div class="absolute inset-4 glass-card rounded-full p-3 border-2 border-neon-cyan/60 shadow-neon-cyan flex items-center justify-center overflow-hidden">
+                        <img src="WhatsApp Image 2026-10-29 at 6.02.58 PM.jpg"
+                             onerror="this.src='https://placehold.co/400x400/12121a/00f2fe?text=Varun+Kumar'"
+                             alt="Varun Kumar - Graphic Designer"
+                             class="w-full h-full object-cover rounded-full filter contrast-110 hover:scale-110 transition-transform duration-700">
+                    </div>
+
+                    <!-- Floating Badges -->
+                    <div class="absolute -top-2 left-6 glass-card px-4 py-2 rounded-xl border border-neon-cyan/40 shadow-lg flex items-center space-x-2 animate-bounce">
+                        <i class="fa-solid fa-pen-nib text-neon-cyan"></i>
+                        <span class="text-xs font-bold">Print & Packaging</span>
+                    </div>
+
+                    <div class="absolute bottom-6 -right-4 glass-card px-4 py-2 rounded-xl border border-neon-purple/40 shadow-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-video text-neon-purple"></i>
+                        <span class="text-xs font-bold">Video Editor</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 2. SIGNATURE GRAPHIC DESIGN SHOWCASE -->
+        <section id="image-showcase" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-neon-cyan text-sm font-bold tracking-widest uppercase bg-neon-cyan/10 px-4 py-1.5 rounded-full">Visual Identity & Print Portfolio</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-4">Signature Graphic Design Showcase</h2>
+                <p class="text-slate-400 text-sm sm:text-base">
+                    Explore our curated collection of brand identities, print packaging, and commercial signage designs. Use the interactive controls below to inspect every artwork in full high-definition detail.
+                </p>
+            </div>
+
+            <!-- PART A: Continuous Left-to-Right Auto-Scrolling Marquee Ribbon -->
+            <div class="glass-card py-6 rounded-3xl border border-neon-cyan/20 overflow-hidden mb-10 relative shadow-neon-cyan">
+                <div class="flex items-center justify-between px-6 mb-3">
+                    <span class="text-xs font-bold uppercase tracking-widest text-neon-cyan flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Featured Design Stream — Select Any Artwork For Full-Screen Inspection
+                    </span>
+                    <span class="text-xs text-slate-400">Interactive Gallery</span>
+                </div>
+                <div class="overflow-hidden w-full">
+                    <div id="marquee-ribbon" class="animate-left-to-right gap-4 px-4">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PART B: Large Interactive One-by-One Viewer with Left/Right Buttons -->
+            <div class="glass-card p-6 sm:p-10 rounded-3xl border border-white/15 relative shadow-2xl max-w-5xl mx-auto"
+                 onmouseenter="hoverPauseImg(true)"
+                 onmouseleave="hoverPauseImg(false)">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <span id="large-img-counter" class="px-4 py-1.5 rounded-full bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/40 text-xs font-black uppercase tracking-wider">
+                            Featured Project 01
+                        </span>
+                        <h3 id="large-img-title" class="text-lg sm:text-2xl font-black text-white mt-2">
+                            Movie Night Premium Projector Campaign
+                        </h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleAutoPlayImages()" id="img-autoplay-btn" class="px-4 py-2 rounded-xl glass-card border border-neon-cyan/40 text-neon-cyan text-xs font-bold hover:bg-neon-cyan hover:text-dark-900 transition-all">
+                            <i class="fa-solid fa-pause mr-1"></i> Pause Presentation
+                        </button>
+                        <button onclick="openCurrentImageModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-900 text-xs font-bold shadow-neon-cyan hover:scale-105 transition-all">
+                            <i class="fa-solid fa-expand mr-1"></i> High-Res View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Large Image Stage -->
+                <div class="relative w-full h-[420px] sm:h-[620px] rounded-2xl bg-dark-800/90 border border-white/10 flex items-center justify-center overflow-hidden group">
+                    <img id="large-stage-img"
+                         src="WhatsApp Image 2026-10-29 at 6.02.58 PM (1).jpg"
+                         onerror="tryAltExtension(this)"
+                         alt="Varun Kumar Graphic Design"
+                         class="max-h-[92%] max-w-[92%] object-contain rounded-xl shadow-2xl transition-all duration-500">
+
+                    <!-- Left Button -->
+                    <button onclick="changeLargeImage(-1)" aria-label="Previous Design" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 rounded-full glass-card border-2 border-neon-cyan/50 flex items-center justify-center text-white hover:bg-neon-cyan hover:text-dark-900 transition-all shadow-neon-cyan z-20 text-xl sm:text-2xl">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <!-- Right Button -->
+                    <button onclick="changeLargeImage(1)" aria-label="Next Design" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 rounded-full glass-card border-2 border-neon-cyan/50 flex items-center justify-center text-white hover:bg-neon-cyan hover:text-dark-900 transition-all shadow-neon-cyan z-20 text-xl sm:text-2xl">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Quick Thumbnail Strip Scroller Under Large Image -->
+                <div id="large-img-thumbs" class="flex items-center gap-3 overflow-x-auto py-4 mt-4 relative">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. COMMERCIAL VIDEO PRODUCTION & MOTION GRAPHICS SHOWREEL -->
+        <section id="video-showcase" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-neon-orange text-sm font-bold tracking-widest uppercase bg-neon-orange/10 px-4 py-1.5 rounded-full">Motion Graphics & Commercial Edits</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-4">Video Production Showreel</h2>
+                <p class="text-slate-400 text-sm sm:text-base">
+                    Experience high-impact <span class="text-neon-orange font-bold">commercial video production, 3D product animations, and promotional reels</span> crafted for leading brands.
+                </p>
+            </div>
+
+            <!-- Main Video Theater Player with Left/Right Buttons -->
+            <div id="video-theater-box" class="glass-card p-6 sm:p-10 rounded-3xl border border-neon-orange/30 shadow-neon-orange max-w-5xl mx-auto mb-14">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <span id="video-counter" class="px-4 py-1.5 rounded-full bg-neon-orange/15 text-neon-orange border border-neon-orange/40 text-xs font-black uppercase tracking-wider">
+                            Featured Production 01
+                        </span>
+                        <h3 id="video-title" class="text-lg sm:text-2xl font-black text-white mt-2">
+                            Brand Commercial & Motion Visual — Reel 01
+                        </h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="changeVideo(-1)" class="px-4 py-2.5 rounded-xl glass-card border border-white/20 hover:border-neon-orange text-white text-xs font-bold transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-backward-step text-neon-orange"></i> Previous Reel
+                        </button>
+                        <button onclick="changeVideo(1)" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-neon-orange to-neon-pink text-dark-900 text-xs font-black shadow-neon-orange hover:scale-105 transition-all flex items-center gap-2">
+                            Next Reel <i class="fa-solid fa-forward-step"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Player Stage -->
+                <div class="relative w-full h-[380px] sm:h-[540px] rounded-2xl bg-black border border-white/10 flex items-center justify-center overflow-hidden">
+                    <video id="main-video-player" controls playsinline class="w-full h-full object-contain">
+                        <source id="main-video-source" src="WhatsApp Video 2026-10-29 at 6.05.34 PM.mp4" type="video/mp4">
+                        Your browser does not support HTML5 video.
+                    </video>
+
+                    <!-- Left / Right Floating Video Arrows -->
+                    <button onclick="changeVideo(-1)" class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card border border-neon-orange/50 flex items-center justify-center text-white hover:bg-neon-orange hover:text-dark-900 transition-all z-10">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="changeVideo(1)" class="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card border border-neon-orange/50 flex items-center justify-center text-white hover:bg-neon-orange hover:text-dark-900 transition-all z-10">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Production Interactive Grid -->
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-black text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clapperboard text-neon-orange"></i> Commercial Motion Portfolio (Select Any Reel to Watch)
+                    </h3>
+                    <span class="text-xs text-slate-400">Hover over any card for live preview</span>
+                </div>
+                <div id="video-playlist-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 4. ABOUT & PRO SKILLS SECTION -->
+        <section id="about" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-neon-cyan text-sm font-bold tracking-widest uppercase bg-neon-cyan/10 px-4 py-1.5 rounded-full">Expertise & Stack</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-6">Professional Skills</h2>
+                <p class="text-slate-400 text-base sm:text-lg">
+                    Mastery over industry-standard design suites, pre-press production workflows, color management, and cinematic video editing.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Adobe Illustrator -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 text-2xl font-black shadow-lg">
+                        Ai
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Illustrator</h3>
+                            <span class="text-xs font-bold text-orange-400 px-2 py-0.5 rounded bg-orange-500/10">Expert</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Vector graphics, branding, die-line creation, logo design & typography setup.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-orange-500 to-amber-400 h-full rounded-full" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adobe Photoshop -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl font-black shadow-lg">
+                        Ps
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Photoshop</h3>
+                            <span class="text-xs font-bold text-blue-400 px-2 py-0.5 rounded bg-blue-500/10">Expert</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Photo manipulation, color correction, retouching, pre-press & banner design.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full" style="width: 98%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adobe InDesign -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 text-2xl font-black shadow-lg">
+                        Id
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">InDesign</h3>
+                            <span class="text-xs font-bold text-pink-400 px-2 py-0.5 rounded bg-pink-500/10">Advanced</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Multi-page brochures, catalogs, magazines, print layouts & publishing standards.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-pink-600 to-rose-400 h-full rounded-full" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Corel Draw -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center justify-center text-green-400 text-2xl font-black shadow-lg">
+                        Cd
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Corel Draw</h3>
+                            <span class="text-xs font-bold text-green-400 px-2 py-0.5 rounded bg-green-500/10">Expert</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Packaging layouts, flex printing, precise vector illustrations & commercial production.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-green-600 to-emerald-400 h-full rounded-full" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premiere Pro -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl font-black shadow-lg">
+                        Pr
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Premiere Pro</h3>
+                            <span class="text-xs font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10">Advanced</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Professional video editing, montage, audio syncing, color grading & social media reels.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-purple-600 to-indigo-400 h-full rounded-full" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- After Effects -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 text-2xl font-black shadow-lg">
+                        Ae
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">After Effects</h3>
+                            <span class="text-xs font-bold text-violet-400 px-2 py-0.5 rounded bg-violet-500/10">Advanced</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Motion graphics, visual effects, logo animations, lower thirds & dynamic branding clips.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-violet-600 to-fuchsia-400 h-full rounded-full" style="width: 88%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pre-Press & Die-Line -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400 text-2xl font-black shadow-lg">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Packaging & Die-Line</h3>
+                            <span class="text-xs font-bold text-fuchsia-400 px-2 py-0.5 rounded bg-fuchsia-500/10">Mastery</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">FMCG pouch design, box die-lines, nutritional layout & print finishing standards.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-fuchsia-600 to-pink-500 h-full rounded-full" style="width: 96%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print & Production Standards -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl font-black shadow-lg">
+                        Cn
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg">Canva & Print Prep</h3>
+                            <span class="text-xs font-bold text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10">Expert</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">CMYK setup, bleed, color calibration & high-volume commercial print output.</p>
+                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full" style="width: 98%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 5. WORK EXPERIENCE SECTION -->
+        <section id="experience" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-neon-purple text-sm font-bold tracking-widest uppercase bg-neon-purple/10 px-4 py-1.5 rounded-full">Career Journey</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-6">Work Experience</h2>
+                <p class="text-slate-400 text-base sm:text-lg">
+                    6 years of proven professional impact managing high-scale packaging production and corporate branding.
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-8">
+                <!-- Job 1: Duropack Limited -->
+                <div class="glass-card p-8 rounded-3xl border border-neon-cyan/30 shadow-neon-cyan relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/10 rounded-full filter blur-2xl group-hover:bg-neon-cyan/20 transition-all"></div>
+
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <span class="px-3 py-1 rounded-full bg-neon-cyan/10 text-neon-cyan text-xs font-bold">11/2023 - 07/2026 (2.8 Years)</span>
+                            <h3 class="text-2xl font-black text-white mt-2">Graphic Designer</h3>
+                            <h4 class="text-lg font-bold text-neon-cyan flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-building"></i> DUROPACK LIMITED
+                            </h4>
+                        </div>
+                        <div class="glass-card px-4 py-2 rounded-xl border border-white/10 text-right">
+                            <span class="text-xs text-slate-400 block">Brand Managed</span>
+                            <span class="font-bold text-sm text-white">DUROPACK</span>
+                        </div>
+                    </div>
+
+                    <ul class="space-y-3 text-slate-300 text-sm sm:text-base">
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-cyan mt-1.5 flex-shrink-0"></i>
+                            <span>Printing production management, including pre-press, color correction, and final output quality control.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-cyan mt-1.5 flex-shrink-0"></i>
+                            <span>Handling print layouts, packaging designs, and ensuring accurate file preparation for production.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-cyan mt-1.5 flex-shrink-0"></i>
+                            <span>Strong knowledge of printing materials, finishing processes, and packaging standards.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-cyan mt-1.5 flex-shrink-0"></i>
+                            <span>Expertise in color matching, CMYK setup, bleed, die-line, and print-ready file preparation.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Job 2: Gulika Apparel Private Limited -->
+                <div class="glass-card p-8 rounded-3xl border border-neon-purple/30 shadow-neon-purple relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-neon-purple/10 rounded-full filter blur-2xl group-hover:bg-neon-purple/20 transition-all"></div>
+
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <span class="px-3 py-1 rounded-full bg-neon-purple/10 text-neon-purple text-xs font-bold">09/2021 - 10/2023 (2 Years)</span>
+                            <h3 class="text-2xl font-black text-white mt-2">Graphic Designer</h3>
+                            <h4 class="text-lg font-bold text-neon-purple flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-shirt"></i> Gulika Apparel Private Limited
+                            </h4>
+                        </div>
+                        <div class="glass-card px-4 py-2 rounded-xl border border-white/10 text-right">
+                            <span class="text-xs text-slate-400 block">Brands Managed</span>
+                            <span class="font-bold text-sm text-white">Speedex, Peachberry</span>
+                        </div>
+                    </div>
+
+                    <ul class="space-y-3 text-slate-300 text-sm sm:text-base">
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-purple mt-1.5 flex-shrink-0"></i>
+                            <span>Developed innovative design concepts for various digital and print media, including logos, brochures, websites, and marketing materials.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-purple mt-1.5 flex-shrink-0"></i>
+                            <span>Created compelling visual concepts and layouts that aligned with brand identity and marketing goals.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-purple mt-1.5 flex-shrink-0"></i>
+                            <span>Led the design and development of complete brand identities for clients, including logo creation, color schemes, and typography selection.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-circle-check text-neon-purple mt-1.5 flex-shrink-0"></i>
+                            <span>Worked closely with clients to understand their vision and delivered designs that accurately reflected their brand ethos.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 6. CATEGORIZED PORTFOLIO GRID -->
+        <section id="portfolio" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-neon-orange text-sm font-bold tracking-widest uppercase bg-neon-orange/10 px-4 py-1.5 rounded-full">Categorized Archive</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-6">Complete Graphic Works Grid</h2>
+                <p class="text-slate-400 text-base sm:text-lg">
+                    Filter Varun's graphic design works across Digital Signage, Packaging & FMCG Labels, and Brand Campaigns.
+                </p>
+
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap justify-center gap-3 mt-8">
+                    <button class="filter-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-900 shadow-neon-cyan transition-all" data-filter="all">All Works</button>
+                    <button class="filter-btn px-6 py-2.5 rounded-xl font-bold text-sm glass-card border border-white/10 hover:border-neon-cyan text-slate-300 transition-all" data-filter="signage">Auxo Digital Signage</button>
+                    <button class="filter-btn px-6 py-2.5 rounded-xl font-bold text-sm glass-card border border-white/10 hover:border-neon-purple text-slate-300 transition-all" data-filter="packaging">Product Packaging & FMCG</button>
+                    <button class="filter-btn px-6 py-2.5 rounded-xl font-bold text-sm glass-card border border-white/10 hover:border-neon-orange text-slate-300 transition-all" data-filter="branding">L4 Services & Branding</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Grid Container -->
+            <div id="full-portfolio-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+
+        <!-- 7. EDUCATION & HOBBIES SECTION -->
+        <section id="education" class="py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Education Timeline -->
+                <div class="glass-card p-8 rounded-3xl border border-white/10">
+                    <div class="flex items-center space-x-3 mb-8">
+                        <div class="w-12 h-12 rounded-2xl bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center text-neon-cyan text-xl">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black">Education Background</h3>
+                            <p class="text-xs text-slate-400">Academic credentials & formal learning</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8 border-l-2 border-neon-cyan/30 pl-6 ml-3">
+                        <div class="relative">
+                            <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-neon-cyan shadow-neon-cyan"></div>
+                            <span class="text-xs font-bold text-neon-cyan">2021</span>
+                            <h4 class="text-lg font-black text-white mt-1">BA from Delhi University</h4>
+                            <p class="text-xs text-slate-400 mt-1">Graduated with foundational humanities and analytical skills.</p>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-neon-purple shadow-neon-purple"></div>
+                            <span class="text-xs font-bold text-neon-purple">2018</span>
+                            <h4 class="text-lg font-black text-white mt-1">12th Passed from CBSE Board</h4>
+                            <p class="text-xs text-slate-400 mt-1">Completed senior secondary education under CBSE guidelines.</p>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-neon-orange shadow-neon-orange"></div>
+                            <span class="text-xs font-bold text-neon-orange">2016</span>
+                            <h4 class="text-lg font-black text-white mt-1">10th Passed from CBSE Board</h4>
+                            <p class="text-xs text-slate-400 mt-1">Completed foundational secondary education.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hobbies & Interests -->
+                <div class="glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-8">
+                            <div class="w-12 h-12 rounded-2xl bg-neon-purple/10 border border-neon-purple/30 flex items-center justify-center text-neon-purple text-xl">
+                                <i class="fa-solid fa-heart"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black">Hobbies & Interests</h3>
+                                <p class="text-xs text-slate-400">What fuels Varun's creative inspiration</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-neon-cyan transition-all">
+                                <div class="w-14 h-14 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-music"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-base">Music</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Rhythm & audio immersion</p>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-neon-purple transition-all">
+                                <div class="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-pen-fancy"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-base">Writing</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Poetry & conceptual scripts</p>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-neon-orange transition-all">
+                                <div class="w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 text-2xl mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-plane-departure"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-base">Travel</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Exploring new visual aesthetics</p>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-neon-pink transition-all">
+                                <div class="w-14 h-14 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 text-2xl mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-palette"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-base">Painting</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Traditional canvas & color theory</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                        <p class="text-xs text-slate-400 italic">"Art is not what you see, but what you make others see."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 8. CONTACT SECTION -->
+        <section id="contact" class="py-20">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-neon-cyan text-sm font-bold tracking-widest uppercase bg-neon-cyan/10 px-4 py-1.5 rounded-full">Get In Touch</span>
+                <h2 class="text-3xl sm:text-5xl font-black mt-4 mb-6">Let's Create Together</h2>
+                <p class="text-slate-400 text-base sm:text-lg">
+                    Have a packaging project, corporate branding requirement, or video editing task? Drop a message below!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Contact Info Cards -->
+                <div class="space-y-6">
+                    <!-- Address -->
+                    <div class="glass-card p-6 rounded-2xl border border-white/10 flex items-start space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center text-neon-cyan text-xl flex-shrink-0">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm uppercase tracking-wider">Address</h4>
+                            <p class="text-slate-300 text-sm mt-1">C-7/50 Sultan Puri, Delhi - 110086</p>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="glass-card p-6 rounded-2xl border border-white/10 flex items-start space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-purple/10 border border-neon-purple/30 flex items-center justify-center text-neon-purple text-xl flex-shrink-0">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm uppercase tracking-wider">Email Me</h4>
+                            <a href="mailto:Varun954066@gmail.com" class="text-slate-300 text-sm mt-1 hover:text-neon-purple transition-colors block">Varun954066@gmail.com</a>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="glass-card p-6 rounded-2xl border border-white/10 flex items-start space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-orange/10 border border-neon-orange/30 flex items-center justify-center text-neon-orange text-xl flex-shrink-0">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm uppercase tracking-wider">Call / WhatsApp</h4>
+                            <a href="tel:+918376906040" class="text-slate-300 text-sm mt-1 hover:text-neon-orange transition-colors block">+91 8376906040</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="lg:col-span-2 glass-card p-8 rounded-3xl border border-white/10 relative">
+                    <form id="contact-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Your Name</label>
+                                <input type="text" id="sender-name" required placeholder="Enter your name" class="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-neon-cyan transition-colors text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Your Email</label>
+                                <input type="email" id="sender-email" required placeholder="name@example.com" class="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-neon-cyan transition-colors text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Subject / Project Type</label>
+                            <input type="text" id="sender-subject" required placeholder="e.g. Packaging Design / Video Editing" class="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-neon-cyan transition-colors text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Your Message</label>
+                            <textarea id="sender-message" rows="5" required placeholder="Describe your project scope or requirement..." class="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-neon-cyan transition-colors text-sm"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-orange text-dark-900 font-bold text-base shadow-neon-cyan hover:opacity-90 transition-all hover:scale-[1.01] flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Send Message to Varun</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-white/5 py-8 text-center text-xs text-slate-400">
+        <div class="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 Varun Kumar. All Rights Reserved. Graphic Designer & Video Editor.</p>
+            <div class="flex space-x-6 text-lg">
+                <a href="mailto:Varun954066@gmail.com" class="hover:text-neon-cyan transition-colors"><i class="fa-solid fa-envelope"></i></a>
+                <a href="tel:+918376906040" class="hover:text-neon-orange transition-colors"><i class="fa-solid fa-phone"></i></a>
+                <a href="#contact" class="hover:text-neon-purple transition-colors"><i class="fa-solid fa-location-dot"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Fullscreen Detail Modal Popup -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-dark-900/90 backdrop-blur-lg flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-card max-w-4xl w-full p-6 sm:p-8 rounded-3xl border border-neon-cyan/50 shadow-neon-cyan relative transform scale-95 transition-transform duration-300" id="modal-content-box">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modal-title" class="text-xl sm:text-2xl font-black mb-3 gradient-text">Project Title</h3>
+            <div class="my-4 rounded-2xl overflow-hidden border border-white/10 max-h-[70vh] bg-dark-800 flex items-center justify-center">
+                <img id="modal-img" src="" onerror="tryAltExtension(this)" alt="Project Preview" class="max-h-[68vh] w-auto object-contain">
+            </div>
+            <p id="modal-desc" class="text-slate-300 text-sm leading-relaxed mb-6">High-resolution graphic design artwork by Varun Kumar.</p>
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-xl bg-neon-cyan text-dark-900 font-bold text-sm shadow-neon-cyan">Close Preview</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+        // =========================================================================
+        // 1. SMART EXTENSION FALLBACK (.jpg <-> .jpeg)
+        // =========================================================================
+        function tryAltExtension(imgEl) {
+            const currentSrc = imgEl.getAttribute('src');
+            if (!imgEl.dataset.triedAlt) {
+                imgEl.dataset.triedAlt = 'true';
+                if (currentSrc.endsWith('.jpg')) {
+                    imgEl.src = currentSrc.replace(/\.jpg$/, '.jpeg');
+                    return;
+                } else if (currentSrc.endsWith('.jpeg')) {
+                    imgEl.src = currentSrc.replace(/\.jpeg$/, '.jpg');
+                    return;
+                }
+            }
+            imgEl.src = 'https://placehold.co/600x600/12121a/00f2fe?text=' + encodeURIComponent(imgEl.alt || 'Varun+Design');
+        }
+
+        // =========================================================================
+        // 2. COMPLETE LIST OF GRAPHIC DESIGN IMAGES (Clean Professional Titles)
+        // =========================================================================
+        const allGraphicImages = [
+            { file: "WhatsApp Image 2026-10-29 at 6.02.58 PM (1).jpg", cat: "signage", label: "Movie Night Premium Projector Campaign", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.02.58 PM.jpg", cat: "signage", label: "Turn Screens Into Sales — Outdoor Digital Signage", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.02.59 PM (1).jpg", cat: "signage", label: "Big Ideas Bigger Results — Corporate Boardroom Display", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.02.59 PM (2).jpg", cat: "signage", label: "Smart Displays — Hospitality & Hotel Deals Billboard", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.02.59 PM.jpg", cat: "branding", label: "The Choice Is Yours — Premium Repair Center Comparison", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.00 PM (1).jpeg", cat: "signage", label: "India vs West Indies — Live Sports Digital Kiosk", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.00 PM (2).jpeg", cat: "signage", label: "Your Wall Becomes A Cinema — Home Theatre Visual", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.00 PM.jpg", cat: "branding", label: "Your Phone Our Expertise — Complete Repair Suite", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.01 PM (1).jpeg", cat: "signage", label: "The Future Of Communication — 4K Commercial Display", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.01 PM.jpeg", cat: "signage", label: "Premium Podcast Studios — Acoustic & Visual Setup", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.02 PM.jpeg", cat: "signage", label: "Modern Display Solutions — Express Highway Unipole", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.03 PM.jpeg", cat: "signage", label: "Display Your Brand The Smart Way — Auditorium LED", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.10 PM.jpg", cat: "packaging", label: "Tempeh Chips — Nutritional & Story Back Packaging", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.11 PM.jpg", cat: "packaging", label: "Tempeh Chips — Sour Cream Flavour Front Pouch", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.12 PM (1).jpg", cat: "packaging", label: "Tempeh Chips — Dried Lemon & Chilli Balado Pouch", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.12 PM.jpg", cat: "packaging", label: "Tempeh Chips — Spicy Balado Back Packaging Layout", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.13 PM (1).jpg", cat: "packaging", label: "Tempeh Chips — Peri Peri Flavour Front Pouch", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.13 PM (2).jpeg", cat: "packaging", label: "Tiggle — Coffee-Infused Hot Chocolate Packaging", client: "Tiggle" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.13 PM.jpg", cat: "packaging", label: "Tempeh Chips — Peri Peri Nutritional Back Layout", client: "Tempeh Station" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.14 PM (1).jpeg", cat: "packaging", label: "Ambrézia — Indian Sandalwood & Turmeric Bath Salt", client: "Ambrézia" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.14 PM (2).jpeg", cat: "packaging", label: "Aweri Foods — Classic Dates Barfi Back Label", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.14 PM.jpg", cat: "packaging", label: "Vedgram — 100% Natural Stone Ground Sattu Pouch", client: "Vedgram" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.15 PM.jpeg", cat: "packaging", label: "Aweri Foods — Classic Dates Barfi Front Packaging", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.16 PM.jpeg", cat: "packaging", label: "Aweri Foods — Daalchini Dates Barfi Back Specification", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.17 PM (1).jpeg", cat: "packaging", label: "Aweri Foods — Coffee Dates Barfi Back Specification", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.17 PM.jpeg", cat: "packaging", label: "Aweri Foods — Daalchini Dates Barfi Front Box", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.18 PM (1).jpg", cat: "packaging", label: "Pluckk — Frozen Blueberries Nutritional Back Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.18 PM.jpeg", cat: "packaging", label: "Aweri Foods — Coffee Dates Barfi Front Packaging", client: "Aweri Foods" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.19 PM (1).jpg", cat: "packaging", label: "Pluckk — Frozen Strawberries Nutritional Back Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.19 PM (2).jpg", cat: "packaging", label: "Pluckk — Frozen Strawberry Front Retail Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.19 PM.jpg", cat: "packaging", label: "Pluckk — Frozen Blueberry Front Retail Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.20 PM (1).jpg", cat: "packaging", label: "Pluckk — Frozen Raspberry Front Retail Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.20 PM.jpg", cat: "packaging", label: "Pluckk — Frozen Raspberries Nutritional Back Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.21 PM.jpg", cat: "packaging", label: "Pluckk — Frozen Cranberries Nutritional Back Pouch", client: "Pluckk" },
+            { file: "WhatsApp Image 2026-10-29 at 6.03.24 PM.jpg", cat: "signage", label: "Retail Digital Signage — Commercial Street Kiosk", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.34 PM.jpg", cat: "signage", label: "Smart Home Projection — Entertainment Visual", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.35 PM.jpg", cat: "branding", label: "Premium Service Center — Customer Trust Creative", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.36 PM.jpg", cat: "signage", label: "Interactive Conference Display — Q2 Strategy Visual", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.38 PM.jpg", cat: "signage", label: "High-Rise Outdoor LED — Hospitality Campaign", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.39 PM (1).jpeg", cat: "signage", label: "Live Sports Broadcast Signage — Urban Pillar", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.39 PM.jpg", cat: "branding", label: "Mobile Repair Specialists — Service Highlights Poster", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.41 PM (1).jpeg", cat: "signage", label: "Broadcast & Podcast Studio — Brand Identity Visual", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.41 PM.jpeg", cat: "signage", label: "Ultra-Wide Home Cinema — Lifestyle Campaign", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.43 PM.jpeg", cat: "signage", label: "Commercial Highway Billboard — Corporate Branding", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.44 PM.jpeg", cat: "signage", label: "Global Summit LED Stage — Event Signage Concept", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.45 PM.jpeg", cat: "signage", label: "Enterprise Digital Signage — 4K Control Suite", client: "Auxo Technologies" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.51 PM.jpg", cat: "branding", label: "UV Inks — Industrial Printing Supplies Campaign", client: "Best Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.05.59 PM.jpeg", cat: "branding", label: "We Fix What Others Give Up On — Precision Hardware", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.06.00 PM (1).jpeg", cat: "branding", label: "Cracked Today, Perfect Tomorrow — Before/After Ad", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.06.00 PM.jpeg", cat: "branding", label: "Broken Display? Don't Worry — Screen Restoration", client: "L4 Services" },
+            { file: "WhatsApp Image 2026-10-29 at 6.06.01 PM.jpg", cat: "branding", label: "L4 Services — Flagship Brand Identity Creative", client: "L4 Services" }
+        ];
+
+        // =========================================================================
+        // 3. COMPLETE LIST OF VIDEO PRODUCTIONS (Clean Professional Titles)
+        // =========================================================================
+        const allVideoFiles = [
+            { file: "WhatsApp Video 2026-10-29 at 6.05.34 PM.mp4", title: "Commercial Product Ad & Motion Graphics — Reel 01" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.35 PM (1).mp4", title: "3D Packaging & Brand Reveal — Reel 02" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.35 PM.mp4", title: "Trendshop Blue Bubble — 3D Forest & Glow Commercial" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.36 PM.mp4", title: "SoftSteps V-Line Lifting Face Mask — Product Ad" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.37 PM (1).mp4", title: "Dynamic Social Media Promo — Reel 05" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.37 PM (2).mp4", title: "Brand Storytelling & Visual VFX — Reel 06" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.37 PM.mp4", title: "SoftSteps Under Eye Patches — 3D Ingredients Animation" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.38 PM.mp4", title: "Commercial Product Showcase — Reel 08" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.39 PM.mp4", title: "High-Impact Brand Motion — Reel 09" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.40 PM (1).mp4", title: "Sanito ToiletWand — Levitation & Particle VFX Ad" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.40 PM.mp4", title: "Corporate Digital Promo — Reel 11" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.41 PM.mp4", title: "HealSutra Detox Foot Pads — Night Lifestyle Commercial" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.42 PM (1).mp4", title: "SoftSteps Varicose Veins Patches — Retail Motion Ad" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.42 PM (2).mp4", title: "3D Architectural Physics & Collapse Simulation VFX" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.42 PM.mp4", title: "Bull Bond Super Adhesive — Studio Product Zoom Ad" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.43 PM.mp4", title: "E-Commerce Product Launch — Reel 16" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.44 PM.mp4", title: "Visual Effects & Motion Graphic Promo — Reel 17" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.45 PM.mp4", title: "Digital Marketing Video Ad — Reel 18" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.46 PM (1).mp4", title: "Brand Identity Motion Sequence — Reel 19" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.46 PM.mp4", title: "Trendshop Blue Bubble — Water Splash 3D VFX" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.47 PM (1).mp4", title: "Consumer Product Highlight — Reel 21" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.47 PM.mp4", title: "Animated Packaging Commercial — Reel 22" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.49 PM (1).mp4", title: "Promotional Ad Campaign — Reel 23" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.49 PM.mp4", title: "Studio Lighting & Product Motion — Reel 24" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.50 PM.mp4", title: "3D Visual Merchandising Reel — Reel 25" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.51 PM.mp4", title: "Social Media Commercial Edit — Reel 26" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.52 PM (1).mp4", title: "Dynamic Brand Spotlight — Reel 27" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.52 PM.mp4", title: "Creative Product Visualization — Reel 28" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.53 PM (1).mp4", title: "SoftSteps 3D Teeth Whitening Strips — Commercial Ad" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.53 PM.mp4", title: "Retail Brand Motion Edit — Reel 30" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.54 PM (1).mp4", title: "Lifestyle Product Commercial — Reel 31" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.54 PM.mp4", title: "Digital Ad Film & Color Grade — Reel 32" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.55 PM (1).mp4", title: "Motion Design Showreel Clip — Reel 33" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.55 PM (2).mp4", title: "High-Conversion Video Ad — Reel 34" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.55 PM.mp4", title: "Full-Length Brand Documentary & Promo — Reel 35" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.56 PM.mp4", title: "3D Product Rendering & VFX — Reel 36" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.57 PM (1).mp4", title: "Commercial Brand Showcase — Reel 37" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.57 PM.mp4", title: "Fast-Paced Promo Cut — Reel 38" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.58 PM.mp4", title: "Visual Storytelling Edit — Reel 39" },
+            { file: "WhatsApp Video 2026-10-29 at 6.05.59 PM.mp4", title: "Premium Brand Commercial — Reel 40" },
+            { file: "WhatsApp Video 2026-10-29 at 6.06.01 PM.mp4", title: "L4 Services — Precision Smartphone Repair Process Reel" }
+        ];
+
+        // =========================================================================
+        // 4. RENDER LEFT-TO-RIGHT MARQUEE & LARGE IMAGE VIEWER
+        // =========================================================================
+        let currentImgIndex = 0;
+        let isImgAutoPlaying = true;
+        let isHoverPaused = false;
+        let imgAutoPlayTimer = null;
+
+        function initImageShowcases() {
+            const ribbon = document.getElementById('marquee-ribbon');
+            const thumbsContainer = document.getElementById('large-img-thumbs');
+            const gridContainer = document.getElementById('full-portfolio-grid');
+
+            // 1. Populate Left-to-Right Marquee
+            const marqueeList = [...allGraphicImages, ...allGraphicImages];
+            ribbon.innerHTML = marqueeList.map((item, idx) => {
+                const realIdx = idx % allGraphicImages.length;
+                return `
+                    <div onclick="selectLargeImage(${realIdx})" class="w-40 h-48 sm:w-48 sm:h-56 flex-shrink-0 rounded-2xl overflow-hidden glass-card border border-white/10 hover:border-neon-cyan cursor-pointer group relative transition-transform hover:scale-105">
+                        <img src="${item.file}" onerror="tryAltExtension(this)" alt="${item.label}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-900/95 via-dark-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+                            <span class="text-[10px] font-bold text-neon-cyan uppercase tracking-wider">${item.client}</span>
+                            <span class="text-xs font-bold text-white leading-tight mt-0.5">${item.label}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 2. Populate Thumbnail Strip Under Large Viewer
+            thumbsContainer.innerHTML = allGraphicImages.map((item, idx) => `
+                <button onclick="selectLargeImage(${idx})" id="img-thumb-${idx}" class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 ${idx === 0 ? 'border-neon-cyan scale-105 shadow-neon-cyan' : 'border-white/10 opacity-60'} transition-all hover:opacity-100">
+                    <img src="${item.file}" onerror="tryAltExtension(this)" alt="${item.label}" class="w-full h-full object-cover">
+                </button>
+            `).join('');
+
+            // 3. Populate Full Categorized Grid (Clean Professional Cards)
+            gridContainer.innerHTML = allGraphicImages.map((item, idx) => `
+                <div class="portfolio-item glass-card rounded-2xl overflow-hidden border border-white/10 group glass-card-hover" data-category="${item.cat}">
+                    <div class="relative h-64 overflow-hidden bg-dark-800 cursor-pointer" onclick="openModal('${item.label}', 'Client / Brand: ${item.client} — Designed by Varun Kumar', '${item.file}')">
+                        <img src="${item.file}" onerror="tryAltExtension(this)" alt="${item.label}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute top-3 left-3 glass-card px-3 py-1 rounded-full text-[10px] font-bold text-neon-cyan border border-neon-cyan/30 uppercase">
+                            ${item.client}
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <h3 class="text-sm font-bold text-white truncate group-hover:text-neon-cyan transition-colors">${item.label}</h3>
+                        <p class="text-[11px] text-slate-400 uppercase tracking-wider font-medium">${item.cat === 'signage' ? 'Digital Signage & OOH' : item.cat === 'packaging' ? 'Packaging & Print Design' : 'Brand Identity & Campaign'}</p>
+                        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                            <button onclick="selectLargeImage(${idx}); document.getElementById('image-showcase').scrollIntoView({behavior:'smooth'});" class="text-[11px] font-bold text-neon-purple hover:underline">
+                                Inspect in Showcase
+                            </button>
+                            <button onclick="openModal('${item.label}', 'Client / Brand: ${item.client} — Designed by Varun Kumar', '${item.file}')" class="text-[11px] font-bold text-neon-cyan hover:underline flex items-center gap-1">
+                                Fullscreen <i class="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateLargeImageDisplay();
+            startImgAutoPlay();
+        }
+
+        function updateLargeImageDisplay() {
+            const item = allGraphicImages[currentImgIndex];
+            const stageImg = document.getElementById('large-stage-img');
+            delete stageImg.dataset.triedAlt;
+            stageImg.src = item.file;
+            stageImg.alt = item.label;
+
+            const numStr = String(currentImgIndex + 1).padStart(2, '0');
+            document.getElementById('large-img-counter').innerText = `Featured Project ${numStr} • ${item.client}`;
+            document.getElementById('large-img-title').innerText = item.label;
+
+            const thumbsContainer = document.getElementById('large-img-thumbs');
+
+            // Highlight active thumbnail & scroll ONLY the horizontal strip
+            allGraphicImages.forEach((_, idx) => {
+                const thumb = document.getElementById(`img-thumb-${idx}`);
+                if (thumb) {
+                    if (idx === currentImgIndex) {
+                        thumb.className = "w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-neon-cyan scale-105 shadow-neon-cyan transition-all opacity-100";
+                        if (thumbsContainer) {
+                            const targetScrollLeft = thumb.offsetLeft - (thumbsContainer.clientWidth / 2) + (thumb.clientWidth / 2);
+                            thumbsContainer.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+                        }
+                    } else {
+                        thumb.className = "w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-white/10 opacity-50 transition-all hover:opacity-100";
+                    }
+                }
+            });
+        }
+
+        function changeLargeImage(step) {
+            currentImgIndex = (currentImgIndex + step + allGraphicImages.length) % allGraphicImages.length;
+            updateLargeImageDisplay();
+        }
+
+        function selectLargeImage(index) {
+            currentImgIndex = index;
+            updateLargeImageDisplay();
+        }
+
+        function startImgAutoPlay() {
+            clearInterval(imgAutoPlayTimer);
+            imgAutoPlayTimer = setInterval(() => {
+                if (isImgAutoPlaying && !isHoverPaused) {
+                    changeLargeImage(1);
+                }
+            }, 4000);
+        }
+
+        function hoverPauseImg(pauseState) {
+            isHoverPaused = pauseState;
+        }
+
+        function toggleAutoPlayImages() {
+            isImgAutoPlaying = !isImgAutoPlaying;
+            const btn = document.getElementById('img-autoplay-btn');
+            btn.innerHTML = isImgAutoPlaying
+                ? '<i class="fa-solid fa-pause mr-1"></i> Pause Presentation'
+                : '<i class="fa-solid fa-play mr-1"></i> Resume Presentation';
+        }
+
+        function openCurrentImageModal() {
+            const item = allGraphicImages[currentImgIndex];
+            openModal(item.label, `Client / Brand: ${item.client} — High-Resolution Graphic Design by Varun Kumar`, item.file);
+        }
+
+        // =========================================================================
+        // 5. RENDER VIDEO PRODUCTION STUDIO & PLAYLIST (Clean Professional Titles)
+        // =========================================================================
+        let currentVideoIndex = 0;
+
+        function initVideoStudio() {
+            const videoGrid = document.getElementById('video-playlist-grid');
+            videoGrid.innerHTML = allVideoFiles.map((item, idx) => {
+                const reelNum = String(idx + 1).padStart(2, '0');
+                return `
+                    <div onclick="selectVideo(${idx})" id="video-card-${idx}" class="glass-card rounded-2xl overflow-hidden border ${idx === 0 ? 'border-neon-orange shadow-neon-orange' : 'border-white/10'} cursor-pointer group glass-card-hover">
+                        <div class="relative h-48 bg-black overflow-hidden flex items-center justify-center">
+                            <video src="${item.file}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"></video>
+                            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-dark-900/80 border border-neon-orange/40 text-neon-orange text-[10px] font-bold uppercase tracking-wider">
+                                Reel #${reelNum}
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-neon-orange/90 text-dark-900 flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform pointer-events-none">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="text-xs font-bold text-white truncate group-hover:text-neon-orange transition-colors">${item.title}</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Motion Graphics & Video Production</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateVideoTheater(shouldPlay = true) {
+            const item = allVideoFiles[currentVideoIndex];
+            const videoPlayer = document.getElementById('main-video-player');
+            const videoSource = document.getElementById('main-video-source');
+
+            videoSource.src = item.file;
+            videoPlayer.load();
+            if (shouldPlay) {
+                videoPlayer.play().catch(() => {});
+            }
+
+            const reelNum = String(currentVideoIndex + 1).padStart(2, '0');
+            document.getElementById('video-counter').innerText = `Featured Production ${reelNum}`;
+            document.getElementById('video-title').innerText = item.title;
+
+            allVideoFiles.forEach((_, idx) => {
+                const card = document.getElementById(`video-card-${idx}`);
+                if (card) {
+                    if (idx === currentVideoIndex) {
+                        card.classList.add('border-neon-orange', 'shadow-neon-orange');
+                        card.classList.remove('border-white/10');
+                    } else {
+                        card.classList.remove('border-neon-orange', 'shadow-neon-orange');
+                        card.classList.add('border-white/10');
+                    }
+                }
+            });
+        }
+
+        function changeVideo(step) {
+            currentVideoIndex = (currentVideoIndex + step + allVideoFiles.length) % allVideoFiles.length;
+            updateVideoTheater(true);
+        }
+
+        function selectVideo(index) {
+            currentVideoIndex = index;
+            updateVideoTheater(true);
+            document.getElementById('video-theater-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // =========================================================================
+        // 6. CURSOR, MENU, FILTER, MODAL & 3D THREE.JS PARTICLES
+        // =========================================================================
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursorDot.style.transform = `translate(${posX - 4}px, ${posY - 4}px)`;
+            cursorOutline.animate({
+                transform: `translate(${posX - 18}px, ${posY - 18}px)`
+            }, { duration: 100, fill: 'forwards' });
+        });
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        menuBtn.addEventListener('click', () => mobileMenu.classList.remove('opacity-0', 'pointer-events-none'));
+        closeMenuBtn.addEventListener('click', () => mobileMenu.classList.add('opacity-0', 'pointer-events-none'));
+        mobileLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('opacity-0', 'pointer-events-none')));
+
+        // Portfolio Filtering Logic
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-gradient-to-r', 'from-neon-cyan', 'to-neon-purple', 'text-dark-900', 'shadow-neon-cyan');
+                    b.classList.add('glass-card', 'border', 'border-white/10', 'text-slate-300');
+                });
+                btn.classList.remove('glass-card', 'border', 'border-white/10', 'text-slate-300');
+                btn.classList.add('bg-gradient-to-r', 'from-neon-cyan', 'to-neon-purple', 'text-dark-900', 'shadow-neon-cyan');
+
+                const filterValue = btn.getAttribute('data-filter');
+                const portfolioItems = document.querySelectorAll('.portfolio-item');
+                portfolioItems.forEach(item => {
+                    if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Modal Functionality
+        function openModal(title, desc, imgSrc) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            const modalImg = document.getElementById('modal-img');
+            delete modalImg.dataset.triedAlt;
+            modalImg.src = imgSrc;
+
+            const modal = document.getElementById('detail-modal');
+            const box = document.getElementById('modal-content-box');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            const box = document.getElementById('modal-content-box');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+        }
+
+        // Form Submission Toast
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('sender-name').value;
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = `Thanks, ${name}!`;
+            document.getElementById('toast-msg').innerText = `Your message has been sent to Varun successfully.`;
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 4000);
+
+            document.getElementById('contact-form').reset();
+        }
+
+        // Initialize Showcases & Three.js 3D Background Particle Animation
+        window.addEventListener('load', () => {
+            initImageShowcases();
+            initVideoStudio();
+
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particleCount = 700;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 20;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.03,
+                color: 0x00f2fe,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 5;
+
+            let mouseX = 0;
+            let mouseY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) - 0.5;
+                mouseY = (e.clientY / window.innerHeight) - 0.5;
+            });
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                particles.rotation.y = elapsedTime * 0.05 + (mouseX * 0.5);
+                particles.rotation.x = elapsedTime * 0.03 + (mouseY * 0.5);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        });
+    </script>
+</body>
+</html>
